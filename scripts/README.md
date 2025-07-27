@@ -11,14 +11,23 @@ For easiest use, use the simplified interface:
 python moral_preferences.py generate-questions --num-questions 20
 
 # Run evaluation with default questions (training mode)
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini
 
 # Run evaluation with custom questions (training mode)
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --questions my_questions.json
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions my_questions.json
 
 # Run evaluation with test mode (training/test split + predictive accuracy)
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --test --split 0.8
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --test --split 0.8
 ```
+
+> **Model selection:**
+> You can specify any model string supported by Inspect (see [Inspect providers](https://inspect.aisi.org.uk/providers.html)).
+> Example:
+> ```bash
+> python moral_preferences.py evaluate --model openai/gpt-4o-mini ...
+> python moral_preferences.py evaluate --model together/meta-llama/Llama-3-70B-Instruct ...
+> ```
+> Make sure your API keys are set in your `.env` file.
 
 ## Overview
 
@@ -53,7 +62,7 @@ python moral_preferences.py evaluate [options]
 
 **Required Options:**
 - `--characters`: Path to CSV file with character data
-- `--model`: Model abbreviation (e.g., mistral-instruct, gpt-4o-mini)
+- `--model`: Full Inspect model string (e.g., openai/gpt-4o-mini, together/meta-llama/Llama-3-70B-Instruct)
 
 **Optional Options:**
 - `--questions`: Path to questions JSON file (default: uses questions.json in scripts directory)
@@ -179,40 +188,63 @@ python moral_preferences.py generate-questions --num-questions 20
 
 **Basic evaluation (training mode):**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini
 ```
 
 **Evaluation with custom questions:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --questions my_questions.json
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions my_questions.json
 ```
 
 **Test mode with predictive accuracy:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --test --split 0.8
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --test --split 0.8
 ```
 
 ### Advanced Usage
 
 **More matches per pair:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --n-matches 20
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --n-matches 20
 ```
 
 **Use chain of thought reasoning:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --use-cot
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --use-cot
 ```
 
 **Custom output directory:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --output-dir my_results
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --output-dir my_results
 ```
 
 **Set random seed for reproducibility:**
 ```bash
-python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --seed 42
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --seed 42
 ```
+
+## Measuring Ranking Variance Across Runs
+
+After running multiple evaluations (so that you have several run directories under `logs/results/`), you can measure the variance in the normalized ELO and Glicko2 rankings **between two specific runs**.
+
+**Usage:**
+
+```bash
+cd scripts
+python measure_ranking_variance.py --run1 <run_directory_1> --run2 <run_directory_2>
+```
+
+For example:
+```bash
+python measure_ranking_variance.py --run1 mistral-instruct_20250727_140152_1753617712_5da368c2 --run2 mistral-instruct_20250728_101010_1753620000_abcdef12
+```
+
+This script will:
+- Compute total variation distance and Jensen-Shannon divergence between the two specified runs for both ELO and Glicko2 rankings.
+- Print the results to the console.
+- Save a CSV of the results to `logs/variances/ranking_variance_<run1>_vs_<run2>.csv`.
+
+**Note:** You must specify two valid run directory names under `logs/results/`.
 
 ## Supported Models
 

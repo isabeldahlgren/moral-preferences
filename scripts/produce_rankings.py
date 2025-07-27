@@ -855,7 +855,7 @@ def save_rankings_and_plots(
     models: Dict[str, Any],
     matches: list,
     output_dir: str,
-    model_abbreviation: str,
+    model_string: str,
     save_plots: bool = True
 ) -> Dict[str, str]:
     """
@@ -865,7 +865,7 @@ def save_rankings_and_plots(
         models: Dictionary of trained rating models
         matches: List of match tuples
         output_dir: Directory to save results
-        model_abbreviation: Model abbreviation for naming files
+        model_string: Model string for naming files (e.g., "deepseek-qwen")
         save_plots: Whether to save plots
 
     Returns:
@@ -891,7 +891,7 @@ def save_rankings_and_plots(
             rankings_data[model_name] = rankings
     
     # Save rankings to CSV with timestamped naming
-    rankings_filename = f"{model_abbreviation}_rankings_{timestamp}_{run_id}.csv"
+    rankings_filename = f"{model_string.replace('/', '_')}_rankings_{timestamp}_{run_id}.csv"
     rankings_csv_path = os.path.join(output_dir, rankings_filename)
     with open(rankings_csv_path, 'w') as f:
         f.write("Model,Rank,Player,Rating,Lower_Bound,Upper_Bound,Std_Error,Games\n")
@@ -924,7 +924,7 @@ def save_rankings_and_plots(
         }
     
     # Save metrics to CSV with timestamped naming
-    metrics_filename = f"{model_abbreviation}_metrics_{timestamp}_{run_id}.csv"
+    metrics_filename = f"{model_string.replace('/', '_')}_metrics_{timestamp}_{run_id}.csv"
     metrics_csv_path = os.path.join(output_dir, metrics_filename)
     metrics_df = pd.DataFrame.from_dict(metrics_data, orient='index')
     metrics_df.to_csv(metrics_csv_path)
@@ -939,7 +939,7 @@ def save_rankings_and_plots(
         for model_name, rankings in rankings_data.items():
             if len(rankings) > 0 and len(rankings[0]) >= 2:
                 # Generate timestamped plot filename
-                plot_filename = f"{model_abbreviation}_{model_name.lower()}_{timestamp}_{run_id}.png"
+                plot_filename = f"{model_string.replace('/', '_')}_{model_name.lower()}_{timestamp}_{run_id}.png"
                 plot_path = os.path.join(plots_dir, plot_filename)
                 
                 # Extract just (player, rating) tuples for plotting
@@ -949,7 +949,7 @@ def save_rankings_and_plots(
                 try:
                     plot_normalized_ranking(
                         plot_rankings, 
-                        title=f"{model_name} Rankings - {model_abbreviation}",
+                        title=f"{model_name} Rankings - {model_string}",
                         top_n=10
                     )
                     plt.savefig(plot_path, dpi=300, bbox_inches='tight')
@@ -961,12 +961,12 @@ def save_rankings_and_plots(
         # Add normalized win count plot
         try:
             win_rankings, _ = count_wins_ranking(matches)
-            win_plot_filename = f"{model_abbreviation}_win_counts_{timestamp}_{run_id}.png"
+            win_plot_filename = f"{model_string.replace('/', '_')}_win_counts_{timestamp}_{run_id}.png"
             win_plot_path = os.path.join(plots_dir, win_plot_filename)
             
             plot_normalized_ranking(
                 win_rankings,
-                title=f"Normalized Win Counts - {model_abbreviation}",
+                title=f"Normalized Win Counts - {model_string}",
                 top_n=10
             )
             plt.savefig(win_plot_path, dpi=300, bbox_inches='tight')
@@ -981,7 +981,7 @@ def save_rankings_and_plots(
 def produce_rankings(
     train_csv: str,
     test_csv: str = None,
-    model_abbreviation: str = "unknown",
+    model_string: str = "unknown",
     output_dir: str = "logs/results",
     save_plots: bool = True,
     seed: int = None
@@ -992,7 +992,7 @@ def produce_rankings(
     Args:
         train_csv: Path to training CSV file
         test_csv: Optional path to test CSV file for evaluation
-        model_abbreviation: Model abbreviation for naming output files
+        model_string: Model string for naming output files (e.g., "deepseek-qwen")
         output_dir: Directory to save results
         save_plots: Whether to save ranking plots
         seed: Random seed for reproducibility
@@ -1009,9 +1009,9 @@ def produce_rankings(
     run_id = generate_run_id()
     
     # Create model-specific output directory with timestamp
-    model_output_dir = os.path.join(output_dir, f"{model_abbreviation}_{timestamp}_{run_id}")
+    model_output_dir = os.path.join(output_dir, f"{model_string.replace('/', '_')}_{timestamp}_{run_id}")
     
-    print(f"Producing rankings for model: {model_abbreviation}")
+    print(f"Producing rankings for model: {model_string}")
     print(f"Run ID: {run_id}")
     print(f"Timestamp: {timestamp}")
     print(f"Training data: {train_csv}")
@@ -1034,7 +1034,7 @@ def produce_rankings(
     # Save rankings and plots
     print("Saving rankings and plots...")
     results_files = save_rankings_and_plots(
-        trained_models, matches, model_output_dir, model_abbreviation, save_plots
+        trained_models, matches, model_output_dir, model_string, save_plots
     )
     
     # Evaluate on test data if provided
@@ -1050,7 +1050,7 @@ def produce_rankings(
         )
         
         # Save evaluation results with timestamped naming
-        eval_filename = f"{model_abbreviation}_evaluation_{timestamp}_{run_id}.csv"
+        eval_filename = f"{model_string.replace('/', '_')}_evaluation_{timestamp}_{run_id}.csv"
         eval_csv_path = os.path.join(model_output_dir, eval_filename)
         eval_df = pd.DataFrame.from_dict(test_results, orient='index')
         eval_df.to_csv(eval_csv_path)
@@ -1090,7 +1090,7 @@ Examples:
     parser.add_argument(
         "--model", 
         required=True,
-        help="Model abbreviation for naming output files (e.g., deepseek-qwen, gpt-4o-mini)"
+        help="Model string for naming output files (e.g., deepseek-qwen, gpt-4o-mini)"
     )
     
     parser.add_argument(
@@ -1117,7 +1117,7 @@ Examples:
         results_files = produce_rankings(
             train_csv=args.train,
             test_csv=args.test,
-            model_abbreviation=args.model,
+            model_string=args.model,
             output_dir=args.output_dir,
             save_plots=not args.no_plots,
             seed=args.seed

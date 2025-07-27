@@ -96,7 +96,7 @@ def evaluate_command(args):
         # Test mode: split matches into training/testing sets
         print(f"🔬 Test mode: Splitting matches {args.split*100:.0f}% training, {(1-args.split)*100:.0f}% testing")
         train_path, test_path = run_matches(
-            model_abbreviation=args.model,
+            model_string=args.model,
             characters_csv=args.characters,
             questions_json=questions_json,
             mode="training",  # Ignored in split mode
@@ -112,7 +112,7 @@ def evaluate_command(args):
         # Training mode: generate single file
         print("📊 Training mode: Generating rankings and plots only")
         csv_path = run_matches(
-            model_abbreviation=args.model,
+            model_string=args.model,
             characters_csv=args.characters,
             questions_json=questions_json,
             mode="training",
@@ -136,7 +136,7 @@ def evaluate_command(args):
         ranking_files = produce_rankings(
             train_csv=train_path,
             test_csv=test_path,
-            model_abbreviation=args.model,
+            model_string=args.model,
             output_dir=ranking_output_dir,
             save_plots=True,
             seed=args.seed
@@ -145,7 +145,7 @@ def evaluate_command(args):
         # Training mode: use single file for rankings only
         ranking_files = produce_rankings(
             train_csv=csv_path,
-            model_abbreviation=args.model,
+            model_string=args.model,
             output_dir=ranking_output_dir,
             save_plots=True,
             seed=args.seed
@@ -186,13 +186,13 @@ Examples:
   python moral_preferences.py generate-questions --num-questions 20
 
   # Run evaluation with default questions (training mode)
-  python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct
+  python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini
 
   # Run evaluation with custom questions (training mode)
-  python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --questions my_questions.json
+  python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions my_questions.json
 
   # Run evaluation with test mode (training/test split + predictive accuracy)
-  python moral_preferences.py evaluate --characters characters.csv --model mistral-instruct --test --split 0.8
+  python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --test --split 0.8
         """
     )
     
@@ -243,7 +243,7 @@ Examples:
     eval_parser.add_argument(
         '--model',
         required=True,
-        help='Model abbreviation (e.g., deepseek-qwen, gpt-4o-mini, mistral-instruct)'
+        help='Full Inspect model string (e.g., openai/gpt-4o-mini, together/meta-llama/Llama-3-70B-Instruct)'
     )
     eval_parser.add_argument(
         '--questions',

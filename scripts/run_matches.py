@@ -37,15 +37,14 @@ from file_utils import (
 )
 
 
-def cleanup_old_logs(model_abbreviation: str, keep_recent: int = 5):
+def cleanup_old_logs(model_string: str, keep_recent: int = 5):
     """
-    Clean up old log directories for a model, keeping only the most recent ones.
-    
+    Remove old log directories for a given model string, keeping only the most recent N.
     Args:
-        model_abbreviation: Model abbreviation to clean logs for
-        keep_recent: Number of recent log directories to keep
+        model_string: Model string to clean logs for (slashes replaced with underscores)
+        keep_recent: Number of recent logs to keep
     """
-    log_pattern = f"logs/evals/{model_abbreviation}_*"
+    log_pattern = f"logs/evals/{model_string.replace('/', '_')}_*"
     log_dirs = glob.glob(log_pattern)
     
     if len(log_dirs) > keep_recent:
@@ -310,42 +309,22 @@ def preference_eval(
     )
 
 
-def get_model_config(model_abbreviation: str) -> tuple[str, str]:
+def get_model_config(model_string: str) -> tuple[str, str]:
     """
-    Get model configuration for a given abbreviation.
-    
+    Get model configuration for a given model string.
     Args:
-        model_abbreviation: Short name for the model
-        
+        model_string: Full Inspect model string (e.g., openai/gpt-4o-mini)
     Returns:
         Tuple of (model_name, log_dir)
     """
-    # This is a selection of models which run relatively fast (<= 3s/match)
-    models_dict = {
-        "gpt-4o-mini": "openai/gpt-4o-mini",
-        "deepseek-qwen": "together/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-        "llama-4-maverick": "together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
-        "llama-3-instruct": "together/meta-llama/Llama-3.3-70B-Instruct-Turbo",
-        "qwen3": "together/Qwen/Qwen3-235B-A22B-fp8-tput",
-        "deepseek-llama": "together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-free",
-        "mistral-instruct": "together/mistralai/Mistral-7B-Instruct-v0.1",
-    }
-    
-    if model_abbreviation not in models_dict:
-        raise ValueError(f"Unknown model abbreviation: {model_abbreviation}. Available models: {list(models_dict.keys())}")
-    
-    model = models_dict[model_abbreviation]
-    
-    # Create unique log directory with timestamp to avoid conflicts
     import time
     timestamp = int(time.time())
-    log_dir = f"logs/evals/{model_abbreviation}_{timestamp}"
-    
-    return model, log_dir
+    log_dir = f"logs/evals/{model_string.replace('/', '_')}_{timestamp}"
+    return model_string, log_dir
 
 
 def run_matches(
-    model_abbreviation: str,
+    model_string: str,
     characters_csv: str,
     questions_json: str,
     mode: str = "training",
@@ -357,9 +336,8 @@ def run_matches(
 ) -> Union[str, tuple[str, str]]:
     """
     Run matches between character pairs and save results to CSV.
-    
     Args:
-        model_abbreviation: Short name for the model to use
+        model_string: Full Inspect model string (e.g., openai/gpt-4o-mini)
         characters_csv: Path to CSV file with character data
         questions_json: Path to JSON file with questions
         mode: Either "training" or "testing" (ignored if split is provided)
@@ -368,7 +346,6 @@ def run_matches(
         use_cot: Whether to use chain of thought reasoning
         seed: Random seed for reproducibility
         split: If provided, split matches into training/testing sets (e.g., 0.8 for 80% training)
-        
     Returns:
         If split is None: Path to the generated CSV file
         If split is provided: Tuple of (training_csv_path, testing_csv_path)
@@ -378,7 +355,7 @@ def run_matches(
     
     # Setup
     openai_client, anthropic_client = setup_clients()
-    model, log_dir = get_model_config(model_abbreviation)
+    model, log_dir = get_model_config(model_string)
     
     # Parse character data
     dataset_parsed = parse_character_csv(characters_csv)
@@ -394,7 +371,7 @@ def run_matches(
     if split is not None:
         # Split mode: create both training and testing files
         train_filename = generate_matches_filename(
-            model=model_abbreviation,
+            model=model_string,
             mode="train",
             n_matches=n_matches,
             run_id=run_id,
@@ -402,7 +379,7 @@ def run_matches(
             split=split
         )
         test_filename = generate_matches_filename(
-            model=model_abbreviation,
+            model=model_string,
             mode="test", 
             n_matches=n_matches,
             run_id=run_id,
@@ -411,19 +388,19 @@ def run_matches(
         )
         train_csv_path = os.path.join(output_dir, train_filename)
         test_csv_path = os.path.join(output_dir, test_filename)
-        print(f"Running matches with {split*100:.0f}% training split for model: {model_abbreviation}")
+        print(f"Running matches with {split*100:.0f}% training split for model: {model_string}")
         print(f"Run ID: {run_id}")
     else:
         # Single mode: use the specified mode
         filename = generate_matches_filename(
-            model=model_abbreviation,
+            model=model_string,
             mode=mode,
             n_matches=n_matches,
             run_id=run_id,
             timestamp=timestamp
         )
         csv_path = os.path.join(output_dir, filename)
-        print(f"Running {mode} matches for model: {model_abbreviation}")
+        print(f"Running {mode} matches for model: {model_string}")
         print(f"Run ID: {run_id}")
     
     print(f"Characters: {len(dataset_parsed)}")
@@ -603,15 +580,15 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python run_matches.py --model deepseek-qwen --characters characters.csv --questions questions.json --mode training --n-matches 20
-  python run_matches.py --model gpt-4o-mini --characters ethnic.csv --questions moral_preference_10_qs.json --mode testing --n-matches 5
+  python run_matches.py --model openai/gpt-4o-mini --characters characters.csv --questions questions.json --mode training --n-matches 20
+  python run_matches.py --model together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8 --characters ethnic.csv --questions moral_preference_10_qs.json --mode testing --n-matches 5
         """
     )
     
     parser.add_argument(
         "--model", 
         required=True,
-        help="Model abbreviation (e.g., deepseek-qwen, gpt-4o-mini, mistral-instruct)"
+        help="Full Inspect model string (e.g., openai/gpt-4o-mini, together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8)"
     )
     
     parser.add_argument(
@@ -679,7 +656,7 @@ Examples:
         
         if args.split is not None:
             train_path, test_path = run_matches(
-                model_abbreviation=args.model,
+                model_string=args.model,
                 characters_csv=args.characters,
                 questions_json=args.questions,
                 mode=args.mode,
@@ -692,7 +669,7 @@ Examples:
             print(f"\n✅ Successfully generated matches: Training={train_path}, Testing={test_path}")
         else:
             csv_path = run_matches(
-                model_abbreviation=args.model,
+                model_string=args.model,
                 characters_csv=args.characters,
                 questions_json=args.questions,
                 mode=args.mode,

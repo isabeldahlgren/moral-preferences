@@ -26,7 +26,7 @@ from file_utils import (
 
 def run_full_evaluation(
     characters_csv: str,
-    model_abbreviation: str,
+    model_string: str,
     questions_json: str = None,
     num_questions: int = 20,
     n_matches: int = 10,
@@ -43,7 +43,7 @@ def run_full_evaluation(
     
     Args:
         characters_csv: Path to CSV file with character data
-        model_abbreviation: Model abbreviation (e.g., deepseek-qwen, gpt-4o-mini)
+        model_string: Model string (e.g., deepseek-qwen, gpt-4o-mini)
         questions_json: Path to existing questions JSON file (optional)
         num_questions: Number of questions to generate (if generating new ones)
         n_matches: Number of matches per character pair
@@ -107,7 +107,7 @@ def run_full_evaluation(
     if split is not None:
         # Split mode: generate both training and testing files
         train_path, test_path = run_matches(
-            model_abbreviation=model_abbreviation,
+            model_string=model_string,
             characters_csv=characters_csv,
             questions_json=questions_json,
             mode=mode,
@@ -124,7 +124,7 @@ def run_full_evaluation(
     else:
         # Single mode: generate one file based on mode
         csv_path = run_matches(
-            model_abbreviation=model_abbreviation,
+            model_string=model_string,
             characters_csv=characters_csv,
             questions_json=questions_json,
             mode=mode,
@@ -148,7 +148,7 @@ def run_full_evaluation(
         ranking_files = produce_rankings(
             train_csv=train_path,
             test_csv=test_path,
-            model_abbreviation=model_abbreviation,
+            model_string=model_string,
             output_dir=ranking_output_dir,
             save_plots=True,
             seed=seed
@@ -157,7 +157,7 @@ def run_full_evaluation(
         # Use single file
         ranking_files = produce_rankings(
             train_csv=csv_path,
-            model_abbreviation=model_abbreviation,
+            model_string=model_string,
             output_dir=ranking_output_dir,
             save_plots=True,
             seed=seed
@@ -171,7 +171,7 @@ def run_full_evaluation(
     print("\n" + "=" * 60)
     print("EVALUATION COMPLETE!")
     print("=" * 60)
-    print(f"Model: {model_abbreviation}")
+    print(f"Model: {model_string}")
     print(f"Run ID: {run_id}")
     print(f"Timestamp: {timestamp}")
     if split is not None:
@@ -216,7 +216,7 @@ Examples:
     parser.add_argument(
         "--model", 
         required=True,
-        help="Model abbreviation (e.g., deepseek-qwen, gpt-4o-mini, mistral-instruct)"
+        help="Model string (e.g., deepseek-qwen, gpt-4o-mini, mistral-instruct)"
     )
     
     # Optional arguments
@@ -298,7 +298,7 @@ Examples:
     try:
         results = run_full_evaluation(
             characters_csv=args.characters,
-            model_abbreviation=args.model,
+            model_string=args.model,
             questions_json=args.questions,
             num_questions=args.num_questions,
             n_matches=args.n_matches,
