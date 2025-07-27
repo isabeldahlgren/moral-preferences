@@ -11,7 +11,6 @@ This script provides a convenient way to run the complete evaluation pipeline.
 import argparse
 import os
 import sys
-from pathlib import Path
 
 # Add the scripts directory to the path so we can import the other modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -21,9 +20,7 @@ from run_matches import run_matches
 from produce_rankings import produce_rankings
 from file_utils import (
     create_output_directories,
-    generate_questions_filename,
-    generate_timestamp,
-    generate_run_id
+    generate_questions_filename
 )
 
 
@@ -314,7 +311,7 @@ Examples:
             split=args.split
         )
         
-        print(f"\n🎉 Evaluation completed successfully!")
+        print("\n🎉 Evaluation completed successfully!")
         print(f"Results saved in: {args.output_dir}")
         
     except Exception as e:

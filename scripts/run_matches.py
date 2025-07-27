@@ -33,8 +33,7 @@ from inspect_ai.analysis.beta import evals_df
 from file_utils import (
     generate_matches_filename, 
     generate_timestamp, 
-    generate_run_id,
-    create_output_directories
+    generate_run_id
 )
 
 

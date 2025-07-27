@@ -8,14 +8,12 @@ import os
 from collections import defaultdict
 import random
 import matplotlib.pyplot as plt
-from tabulate import tabulate
 from scipy.stats import norm
 from typing import Dict, Any
 from scipy.optimize import differential_evolution, minimize
 
 # Import file utilities for consistent naming
 from file_utils import (
-    generate_rankings_filename,
     generate_timestamp,
     generate_run_id
 )
@@ -2072,7 +2070,7 @@ Examples:
             seed=args.seed
         )
         
-        print(f"\n✅ Successfully generated rankings and metrics")
+        print("\n✅ Successfully generated rankings and metrics")
         print("Generated files:")
         for result_type, file_path in results_files.items():
             print(f"  {result_type}: {file_path}")

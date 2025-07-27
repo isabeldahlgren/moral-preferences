@@ -10,7 +10,6 @@ import sys
 import tempfile
 import json
 import pandas as pd
-from pathlib import Path
 
 # Add the scripts directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -125,7 +124,7 @@ def demonstrate_workflow():
         print("- Evaluation metrics (accuracy, MSE, inconsistency scores)")
         print("- Visualization plots of rankings")
         
-        print(f"\n✅ Example workflow demonstration complete!")
+        print("\n✅ Example workflow demonstration complete!")
         print(f"📁 Sample files created in: {temp_dir}")
 
 def show_cli_help():

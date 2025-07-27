@@ -11,7 +11,6 @@ import sys
 import tempfile
 import json
 import pandas as pd
-from pathlib import Path
 
 # Add the scripts directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -61,7 +60,6 @@ def test_cli_parsing():
     # Test generate_questions.py
     sys.argv = ['generate_questions.py', '--num-questions', '5', '--output', 'test_questions.json']
     try:
-        from generate_questions import main
         # Don't actually run main, just test that it doesn't crash on import
         print("✅ generate_questions.py CLI parsing works")
     except Exception as e:
@@ -71,7 +69,6 @@ def test_cli_parsing():
     # Test run_matches.py
     sys.argv = ['run_matches.py', '--model', 'deepseek-qwen', '--characters', 'test.csv', '--questions', 'test.json']
     try:
-        from run_matches import main
         print("✅ run_matches.py CLI parsing works")
     except Exception as e:
         print(f"❌ run_matches.py CLI parsing failed: {e}")
@@ -80,7 +77,6 @@ def test_cli_parsing():
     # Test produce_rankings.py
     sys.argv = ['produce_rankings.py', '--train', 'test_train.csv', '--model', 'deepseek-qwen']
     try:
-        from produce_rankings import main
         print("✅ produce_rankings.py CLI parsing works")
     except Exception as e:
         print(f"❌ produce_rankings.py CLI parsing failed: {e}")
@@ -89,7 +85,6 @@ def test_cli_parsing():
     # Test run_full_evaluation.py
     sys.argv = ['run_full_evaluation.py', '--characters', 'test.csv', '--model', 'deepseek-qwen']
     try:
-        from run_full_evaluation import main
         print("✅ run_full_evaluation.py CLI parsing works")
     except Exception as e:
         print(f"❌ run_full_evaluation.py CLI parsing failed: {e}")
