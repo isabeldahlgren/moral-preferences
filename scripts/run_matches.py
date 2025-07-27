@@ -470,7 +470,6 @@ def run_matches(
     # Debug: Print information about the evaluation results
     print(f"Number of character pairs: {len(df)}")
     print(f"Number of evaluation results: {len(edf)}")
-    print(f"Evaluation results columns: {edf.columns.tolist()}")
     
     # Check if we have the expected score column
     if "score_headline_value" not in edf.columns:
@@ -485,7 +484,6 @@ def run_matches(
     
     # Handle NaN values in scores
     scores = edf["score_headline_value"]
-    print(f"Score values: {scores.tolist()}")
     
     # Replace NaN values with 0 (neutral score)
     scores = scores.fillna(0)

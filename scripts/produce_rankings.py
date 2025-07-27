@@ -964,13 +964,11 @@ def rank_players_from_csv(
     Dictionary with rankings from specified systems and original matches
     """
 
-    # Default to all models with default parameters if none specified
+    # Default to Elo and Glicko2 models with default parameters if none specified
     if models is None:
         models = [
             ("Elo", {}),
             ("Glicko2", {}),
-            ("Bradley-Terry", {}),
-            ("Elo2K", {}),
         ]
 
     # Validate model names and extract parameters
@@ -1003,14 +1001,6 @@ def rank_players_from_csv(
     if "Glicko2" in model_configs:
         rating_systems["Glicko2"] = Glicko2RatingSystem(**model_configs["Glicko2"])
 
-    if "Bradley-Terry" in model_configs:
-        rating_systems["Bradley-Terry"] = BradleyTerryModel(
-            **model_configs["Bradley-Terry"]
-        )
-
-    if "Elo2K" in model_configs:
-        rating_systems["Elo2K"] = Elo2KRatingSystem(**model_configs["Elo2K"])
-
     # Process matches and create duplicated matches list
     duplicated_matches = []
     original_matches = []
@@ -1021,12 +1011,9 @@ def rank_players_from_csv(
             character2 = row[player_col_b]
             result = row[result_col]
 
-            # Update sequential rating systems (Elo and Elo2K)
+            # Update sequential rating systems (Elo)
             if "Elo" in model_configs:
                 rating_systems["Elo"].update_ratings(character1, character2, result)
-
-            if "Elo2K" in model_configs:
-                rating_systems["Elo2K"].update_ratings(character1, character2, result)
 
             duplicated_matches.append((character1, character2, result))
             if i == 0:
@@ -1046,525 +1033,10 @@ def rank_players_from_csv(
                 player, games["opponents"], games["results"]
             )
 
-    # Fit Bradley-Terry model
-    if "Bradley-Terry" in model_configs:
-        rating_systems["Bradley-Terry"].fit(duplicated_matches)
-
     # Return results
     result_dict = rating_systems.copy()
 
     return result_dict, original_matches
-
-
-# %%
-# Run the ranking systems with specified models
-# NOTE: This section has been commented out as it uses undefined variables
-# when run as a CLI script. This code is for interactive/notebook use only.
-
-# models = [
-#     ("Elo", {"k_factor": 32, "initial_rating": 1500}),
-#     (
-#         "Elo2K",
-#         {
-#             "initial_rating": 1500,
-#             "initial_rd": 350,
-#             "k_min": 8,
-#             "k_max": 64,
-#             "rd_min": 30,
-#             "rd_max": 350,
-#             "c": 15.8,
-#             "time_factor": 0.0,
-#         },
-#     ),
-#     ("Glicko2", {"initial_rating": 1500, "initial_rd": 350, "initial_vol": 0.06}),
-#     ("Bradley-Terry", {}),
-# ]
-
-# models, matches = rank_players_from_csv(
-#     training_csv, models=models, duplication_factor=1
-# )
-
-# elo, glicko2, bradley_terry, elo2k = (
-#     models["Elo"],
-#     models["Glicko2"],
-#     models["Bradley-Terry"],
-#     models["Elo2K"],
-# )
-
-# # %%
-# # Print rankings and confidence intervals
-
-# ranking_elo, ranking_list_elo = elo.get_rankings()
-# elo_ci = elo.get_rankings_with_ci()
-# print(
-#     f"=== ELO === (Score: {calculate_inconsistency_score(matches, ranking_list_elo)})"
-# )
-# print(
-#     tabulate(
-#         elo_ci,
-#         headers=[
-#             "Player",
-#             "Rating",
-#             "Lower Bound",
-#             "Upper Bound",
-#             "Std Error",
-#             "Games",
-#         ],
-#         tablefmt="grid",
-#     )
-# )
-
-# ranking_elo2k, ranking_list_elo2k = elo2k.get_rankings()
-# elo2k_ci = elo.get_rankings_with_ci()
-# print(
-#     f"=== ELO 2k === (Score: {calculate_inconsistency_score(matches, ranking_list_elo2k)})"
-# )
-# # print(
-#     tabulate(
-#         elo2k_ci,
-#         headers=[
-#             "Player",
-#             "Rating",
-#             "Lower Bound",
-#             "Upper Bound",
-#             "Std Error",
-#             "Games",
-#         ],
-#         tablefmt="grid",
-#     )
-# )
-
-# ranking_bradley_terry, ranking_list_bradley_terry = bradley_terry.get_rankings()
-# bradley_terry_ci = bradley_terry.get_rankings_with_ci()
-# print(
-#     f"=== BRADLEY-TERRY === (Score: {calculate_inconsistency_score(matches, ranking_list_bradley_terry)})"
-# )
-# # print(
-#     tabulate(
-#         bradley_terry_ci,
-#         headers=["Player", "Strength", "Lower Bound", "Upper Bound", "Standard Error"],
-#         tablefmt="grid",
-#     )
-# )
-
-# ranking_glicko, ranking_list_glicko = glicko2.get_rankings()
-# ranking_without_rd = [(player, rating) for player, rating, _ in ranking_glicko]
-# glicko_ci = glicko2.get_rankings_with_ci()
-# print(
-#     f"=== GLICKO-2 === (Score: {calculate_inconsistency_score(matches, ranking_list_glicko)})"
-# )
-# # print(
-#     tabulate(
-#         glicko_ci,
-#         headers=[
-#             "Player",
-#             "Rating",
-#             "Lower Bound",
-#             "Upper Bound",
-#             "RD",
-#             "Volatility",
-#             "Games",
-#         ],
-#         tablefmt="grid",
-#     )
-# )
-
-# ranking_counting_wins, ranking_list_counting_wins = count_wins_ranking(matches)
-# print(
-#     f"=== COUNTING WINS === (Score: {calculate_inconsistency_score(matches, ranking_list_glicko)})"
-# )
-# # print(tabulate(ranking_counting_wins, headers=["Player", "Win Count"], tablefmt="grid"))
-
-# # %%
-# # Plot normalized rankings for comparison
-
-# plot_normalized_ranking(ranking_elo, title="Elo Normalized Ranking", top_n=20)
-# plot_normalized_ranking(ranking_elo2k, title="Elo 2k Normalized Ranking", top_n=20)
-# plot_normalized_ranking(
-#     ranking_bradley_terry, title="Bradley-Terry Normalized Ranking", top_n=20
-# )
-# plot_normalized_ranking(
-#     ranking_without_rd, title="Glicko2 Normalized Ranking", top_n=20
-# )
-# plot_normalized_ranking(
-#     ranking_counting_wins, title="Counting Wins Normalized Ranking", top_n=20
-# )
-
-# %%
-# Find optimal K-factor
-
-
-def find_k_factor(
-    csv_file,
-    player_col_a="character1",
-    player_col_b="character2",
-    result_col="result",
-    has_header=True,
-    min_k=1.0,
-    max_k=100.0,
-    precision=0.1,
-    max_iterations=50,
-):
-    """
-    Find optimal k-factor using binary search to minimize inconsistency score
-
-    Parameters:
-    csv_file: path to CSV file or CSV content as string
-    player_col_a: column name for first player
-    player_col_b: column name for second player
-    result_col: column name for result (1 if character1 wins, 0 if character2 wins)
-    has_header: whether CSV has header row
-    min_k: minimum k-factor to search (default: 1.0)
-    max_k: maximum k-factor to search (default: 100.0)
-    precision: stop when search range is smaller than this (default: 0.1)
-    max_iterations: maximum number of binary search iterations (default: 50)
-
-    Returns:
-    Tuple: (best_ranking, best_k_factor, best_inconsistency_score, search_history)
-    """
-    # Read CSV
-    if isinstance(csv_file, str) and "\n" in csv_file:
-        # CSV content as string
-        from io import StringIO
-
-        df = pd.read_csv(StringIO(csv_file))
-    else:
-        # CSV file path
-        df = pd.read_csv(csv_file)
-
-    # Convert dataframe to matches list
-    matches = []
-    for _, row in df.iterrows():
-        character1 = row[player_col_a]
-        character2 = row[player_col_b]
-        result = row[result_col]
-        matches.append((character1, character2, result))
-
-    def evaluate_k_factor(k_factor):
-        """Helper function to evaluate a single k-factor"""
-        # Initialize Elo system with current k-factor
-        elo = EloRatingSystem(k_factor=k_factor)
-
-        # Process matches sequentially
-        for character1, character2, result in matches:
-            elo.update_ratings(character1, character2, result)
-
-        # Get ranking
-        ranking, ranking_list = elo.get_rankings()
-
-        # Calculate inconsistency score
-        inconsistency = calculate_inconsistency_score(matches, ranking_list)
-
-        return ranking, inconsistency
-
-    # Binary search for optimal k-factor
-    left = min_k
-    right = max_k
-    search_history = []
-
-    best_k_factor = None
-    best_ranking = None
-    best_inconsistency = float("inf")
-
-    iteration = 0
-    while (right - left) > precision and iteration < max_iterations:
-        # Calculate three points: left third, middle, right third
-        left_third = left + (right - left) / 3
-        right_third = right - (right - left) / 3
-
-        # Evaluate both points
-        ranking_left, inconsistency_left = evaluate_k_factor(left_third)
-        ranking_right, inconsistency_right = evaluate_k_factor(right_third)
-
-        # Record search history
-        search_history.append(
-            {
-                "iteration": iteration,
-                "left": left,
-                "right": right,
-                "left_third": left_third,
-                "right_third": right_third,
-                "inconsistency_left": inconsistency_left,
-                "inconsistency_right": inconsistency_right,
-            }
-        )
-
-        # Update best solution if found
-        if inconsistency_left < best_inconsistency:
-            best_inconsistency = inconsistency_left
-            best_k_factor = left_third
-            best_ranking = ranking_left
-
-        if inconsistency_right < best_inconsistency:
-            best_inconsistency = inconsistency_right
-            best_k_factor = right_third
-            best_ranking = ranking_right
-
-        # Ternary search logic: move towards better solution
-        if inconsistency_left < inconsistency_right:
-            right = right_third
-        else:
-            left = left_third
-
-        iteration += 1
-
-    # Final evaluation at the converged point
-    if iteration < max_iterations:
-        final_k = (left + right) / 2
-        final_ranking, final_inconsistency = evaluate_k_factor(final_k)
-
-        if final_inconsistency < best_inconsistency:
-            best_inconsistency = final_inconsistency
-            best_k_factor = final_k
-            best_ranking = final_ranking
-
-    return best_ranking, best_k_factor, best_inconsistency, search_history
-
-
-# NOTE: This section has been commented out as it uses undefined variables
-# when run as a CLI script. This code is for interactive/notebook use only.
-
-# print("=== OPTIMISE K-FACTOR ===\n")
-# best_ranking, best_k_factor, best_inconsistency, experiments = find_k_factor(
-#     training_csv
-# )
-# print(
-#     f"Best K-Factor: {best_k_factor}\nInconsistency score {round(best_inconsistency, ndigits=6)}"
-# )
-# print(tabulate(best_ranking, headers=["Player", "Rating"], tablefmt="grid"))
-
-# %%
-# Run other optimisation methods to obtain an optimal unscored ranking
-
-
-def simulated_annealing_ranking(
-    matches, initial_temp=100, cooling_rate=0.99, min_temp=0.001, max_iter=10000
-):
-    """
-    Find optimal ranking using simulated annealing
-    """
-    players = sorted(list(set([p for m in matches for p in [m[0], m[1]]])))
-    n_players = len(players)
-
-    # Start with random ranking
-    current_ranking = players.copy()
-    random.shuffle(current_ranking)
-    current_score = calculate_inconsistency_score(matches, current_ranking)
-
-    best_ranking = current_ranking.copy()
-    best_score = current_score
-
-    temp = initial_temp
-    iteration = 0
-
-    while temp > min_temp and iteration < max_iter:
-        # Generate neighbor by swapping two random players
-        new_ranking = current_ranking.copy()
-        i, j = random.sample(range(n_players), 2)
-        new_ranking[i], new_ranking[j] = new_ranking[j], new_ranking[i]
-
-        new_score = calculate_inconsistency_score(matches, new_ranking)
-
-        # Accept or reject the move
-        if new_score < current_score or random.random() < math.exp(
-            -(new_score - current_score) / temp
-        ):
-            current_ranking = new_ranking
-            current_score = new_score
-
-            if new_score < best_score:
-                best_ranking = current_ranking.copy()
-                best_score = new_score
-
-        temp *= cooling_rate
-        iteration += 1
-
-    return best_ranking, best_score
-
-
-def genetic_algorithm_ranking(
-    matches, population_size=50, generations=10, mutation_rate=0.1, elite_size=5
-):
-    """
-    Find optimal ranking using genetic algorithm
-    """
-    players = sorted(list(set([p for m in matches for p in [m[0], m[1]]])))
-    n_players = len(players)
-
-    def tournament_selection(population, fitness_scores, tournament_size=3):
-        """Tournament selection for genetic algorithm"""
-        tournament_indices = random.sample(range(len(population)), tournament_size)
-        winner_idx = max(tournament_indices, key=lambda i: fitness_scores[i])
-        return population[winner_idx].copy()
-
-    def order_crossover(parent1, parent2):
-        """Order crossover for genetic algorithm"""
-        start, end = sorted(random.sample(range(len(parent1)), 2))
-        child = [None] * len(parent1)
-        child[start:end] = parent1[start:end]
-
-        remaining = [item for item in parent2 if item not in child]
-        j = 0
-        for i in range(len(child)):
-            if child[i] is None:
-                child[i] = remaining[j]
-                j += 1
-
-        return child
-
-    def mutate(individual):
-        """Swap mutation for genetic algorithm"""
-        mutated = individual.copy()
-        i, j = random.sample(range(len(mutated)), 2)
-        mutated[i], mutated[j] = mutated[j], mutated[i]
-        return mutated
-
-    # Initialize population
-    population = []
-    for _ in range(population_size):
-        ranking = players.copy()
-        random.shuffle(ranking)
-        population.append(ranking)
-
-    for generation in range(generations):
-        # Evaluate fitness (lower inconsistency = higher fitness)
-        fitness_scores = []
-        for ranking in population:
-            inconsistency = calculate_inconsistency_score(matches, ranking)
-            # Higher fitness for lower inconsistency
-            fitness_scores.append(1 / (1 + inconsistency))
-
-        # Select elite individuals
-        elite_indices = sorted(
-            range(len(fitness_scores)), key=lambda i: fitness_scores[i], reverse=True
-        )[:elite_size]
-        new_population = [population[i].copy() for i in elite_indices]
-
-        # Generate offspring
-        while len(new_population) < population_size:
-            # Tournament selection
-            parent1 = tournament_selection(population, fitness_scores)
-            parent2 = tournament_selection(population, fitness_scores)
-
-            # Crossover
-            child = order_crossover(parent1, parent2)
-
-            # Mutation
-            if random.random() < mutation_rate:
-                child = mutate(child)
-
-            new_population.append(child)
-
-        population = new_population
-
-    # Return best individual
-    best_ranking = min(
-        population, key=lambda r: calculate_inconsistency_score(matches, r)
-    )
-    best_score = calculate_inconsistency_score(matches, best_ranking)
-
-    return best_ranking, best_score
-
-
-def gradient_free_optimization_ranking(matches):
-    """
-    Find optimal ranking using gradient-free optimization
-    Uses continuous variables for positions, then discretizes
-    """
-    players = sorted(list(set([p for m in matches for p in [m[0], m[1]]])))
-    n_players = len(players)
-
-    def objective(positions):
-        # Convert continuous positions to ranking
-        ranking_indices = np.argsort(positions)
-        ranking = [players[i] for i in ranking_indices]
-        return calculate_inconsistency_score(matches, ranking)
-
-    # Try multiple random starting points
-    best_ranking = None
-    best_score = float("inf")
-
-    for _ in range(10):  # Multiple restarts
-        # Random initial positions
-        initial_positions = np.random.random(n_players)
-
-        # Optimize using Nelder-Mead
-        result = minimize(objective, initial_positions, method="Nelder-Mead")
-
-        if result.success:
-            # Convert final positions to ranking
-            ranking_indices = np.argsort(result.x)
-            ranking = [players[i] for i in ranking_indices]
-            score = calculate_inconsistency_score(matches, ranking)
-
-            if score < best_score:
-                best_ranking = ranking
-                best_score = score
-
-    # Also try differential evolution
-    bounds = [(0, 1) for _ in range(n_players)]
-    result = differential_evolution(objective, bounds, seed=42)
-
-    if result.success:
-        ranking_indices = np.argsort(result.x)
-        ranking = [players[i] for i in ranking_indices]
-        score = calculate_inconsistency_score(matches, ranking)
-
-        if score < best_score:
-            best_ranking = ranking
-            best_score = score
-
-    return best_ranking, best_score if best_ranking else (players, float("inf"))
-
-
-# NOTE: This section has been commented out as it uses undefined variables
-# when run as a CLI script. This code is for interactive/notebook use only.
-
-# df = pd.read_csv(training_csv)
-# matches = [
-#     (row["character1"], row["character2"], row["result"]) for _, row in df.iterrows()
-# ]
-
-# # Find optimal rankings
-# optimal_results = {}
-
-
-# n_iterations = 10_000
-# initial_temp = 100
-# cooling_rate = 0.99
-
-# # Simulated Annealing
-# print("Running Simulated Annealing...")
-# ranking, score = simulated_annealing_ranking(
-#     matches, initial_temp=initial_temp, cooling_rate=cooling_rate, max_iter=n_iterations
-# )
-# optimal_results["simulated_annealing"] = (ranking, score)
-
-# n_generations = 150
-# n_population = 100
-
-# print("Running Genetic Algorithm...")
-# ranking, score = genetic_algorithm_ranking(
-#     matches, population_size=n_population, generations=n_generations
-# )
-# optimal_results["genetic_algorithm"] = (ranking, score)
-
-# # print("Running Gradient-free Optimization...")
-# # ranking, score = gradient_free_optimization_ranking(matches)
-# # optimal_results["gradient_free"] = (ranking, score)
-
-# print("=== REFERENCE INCONSISTENCY SCORES ===")
-
-# for method, (ranking, score) in optimal_results.items():
-#     if ranking is not None:
-#         print(f"\n{method.upper().replace('_', ' ')} (Score: {score:.4f}):")
-#         for i, player in enumerate(ranking, 1):
-#             print(f"{i:2d}. {player}")
-
-# %%
-# Evaluate rating models on test match data
-
-# TODO: Add "Run Pairwise Comparison" method
 
 
 def evaluate_rating_models(
@@ -1809,26 +1281,6 @@ def save_rankings_and_plots(
     
     results_files = {}
     
-    # Default model parameters for evaluation
-    default_models = [
-        ("Elo", {"k_factor": 32, "initial_rating": 1500}),
-        (
-            "Elo2K",
-            {
-                "initial_rating": 1500,
-                "initial_rd": 350,
-                "k_min": 8,
-                "k_max": 64,
-                "rd_min": 30,
-                "rd_max": 350,
-                "c": 15.8,
-                "time_factor": 0.0,
-            },
-        ),
-        ("Glicko2", {"initial_rating": 1500, "initial_rd": 350, "initial_vol": 0.06}),
-        ("Bradley-Terry", {}),
-    ]
-    
     # Get rankings from all models
     rankings_data = {}
     for model_name, model in models.items():
@@ -1884,6 +1336,7 @@ def save_rankings_and_plots(
         plots_dir = os.path.join(output_dir, "plots")
         os.makedirs(plots_dir, exist_ok=True)
         
+        # Plot rankings for each model
         for model_name, rankings in rankings_data.items():
             if len(rankings) > 0 and len(rankings[0]) >= 2:
                 # Generate timestamped plot filename
@@ -1905,6 +1358,23 @@ def save_rankings_and_plots(
                     results_files[f'{model_name.lower()}_plot'] = plot_path
                 except Exception as e:
                     print(f"Warning: Could not save plot for {model_name}: {e}")
+        
+        # Add normalized win count plot
+        try:
+            win_rankings, _ = count_wins_ranking(matches)
+            win_plot_filename = f"{model_abbreviation}_win_counts_{timestamp}_{run_id}.png"
+            win_plot_path = os.path.join(plots_dir, win_plot_filename)
+            
+            plot_normalized_ranking(
+                win_rankings,
+                title=f"Normalized Win Counts - {model_abbreviation}",
+                top_n=10
+            )
+            plt.savefig(win_plot_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            results_files['win_counts_plot'] = win_plot_path
+        except Exception as e:
+            print(f"Warning: Could not save win counts plot: {e}")
     
     return results_files
 
@@ -1950,24 +1420,10 @@ def produce_rankings(
         print(f"Test data: {test_csv}")
     print(f"Output directory: {model_output_dir}")
     
-    # Default model parameters
+    # Only Elo and Glicko2 models
     models = [
         ("Elo", {"k_factor": 32, "initial_rating": 1500}),
-        (
-            "Elo2K",
-            {
-                "initial_rating": 1500,
-                "initial_rd": 350,
-                "k_min": 8,
-                "k_max": 64,
-                "rd_min": 30,
-                "rd_max": 350,
-                "c": 15.8,
-                "time_factor": 0.0,
-            },
-        ),
         ("Glicko2", {"initial_rating": 1500, "initial_rd": 350, "initial_vol": 0.06}),
-        ("Bradley-Terry", {}),
     ]
     
     # Train models on training data
@@ -1987,8 +1443,6 @@ def produce_rankings(
         print("Evaluating models on test data...")
         models_to_test = {
             "elo": trained_models["Elo"],
-            "elo2k": trained_models["Elo2K"],
-            "bradley_terry": trained_models["Bradley-Terry"],
             "glicko2": trained_models["Glicko2"],
         }
         
