@@ -22,4 +22,5 @@ dependencies = [
     "scikit-optimize>=0.10.2",
     "scipy>=1.16.0",
     "tabulate>=0.9.0",
+    "together>=1.5.21",
 ]
