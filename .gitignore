@@ -194,3 +194,4 @@ cython_debug/
 .cursorindexingignore
 data-generation/.DS_Store
 data-generation/tmp.json
+scripts/tmp.json

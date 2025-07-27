@@ -1915,7 +1915,7 @@ def produce_rankings(
     train_csv: str,
     test_csv: str = None,
     model_abbreviation: str = "unknown",
-    output_dir: str = "ranking_results",
+    output_dir: str = "logs/results",
     save_plots: bool = True,
     seed: int = None
 ) -> Dict[str, str]:
@@ -2044,8 +2044,8 @@ Examples:
     
     parser.add_argument(
         "--output-dir", 
-        default="ranking_results",
-        help="Directory to save results (default: ranking_results)"
+        default="logs/results",
+        help="Directory to save results"
     )
     
     parser.add_argument(

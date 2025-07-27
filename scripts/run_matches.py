@@ -46,7 +46,7 @@ def cleanup_old_logs(model_abbreviation: str, keep_recent: int = 5):
         model_abbreviation: Model abbreviation to clean logs for
         keep_recent: Number of recent log directories to keep
     """
-    log_pattern = f"logs/{model_abbreviation}_*"
+    log_pattern = f"logs/evals/{model_abbreviation}_*"
     log_dirs = glob.glob(log_pattern)
     
     if len(log_dirs) > keep_recent:
@@ -340,7 +340,7 @@ def get_model_config(model_abbreviation: str) -> tuple[str, str]:
     # Create unique log directory with timestamp to avoid conflicts
     import time
     timestamp = int(time.time())
-    log_dir = f"logs/{model_abbreviation}_{timestamp}"
+    log_dir = f"logs/evals/{model_abbreviation}_{timestamp}"
     
     return model, log_dir
 
@@ -351,7 +351,7 @@ def run_matches(
     questions_json: str,
     mode: str = "training",
     n_matches: int = 10,
-    output_dir: str = "csv-files",
+    output_dir: str = "logs/csv-files",
     use_cot: bool = False,
     seed: int = None,
     split: float = None
@@ -645,8 +645,8 @@ Examples:
     
     parser.add_argument(
         "--output-dir", 
-        default="csv-files",
-        help="Directory to save output CSV files (default: csv-files)"
+        default="logs/csv-files",
+        help="Directory to save output CSV files"
     )
     
     parser.add_argument(
@@ -664,7 +664,7 @@ Examples:
     parser.add_argument(
         "--split",
         type=float,
-        help="If provided, split matches into training/testing sets (e.g., 0.8 for 80% training)"
+        help="If provided, split matches into training/testing sets (e.g., 0.8 for 80 percent training)"
     )
     
     parser.add_argument(

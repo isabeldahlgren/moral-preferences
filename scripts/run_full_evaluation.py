@@ -34,7 +34,7 @@ def run_full_evaluation(
     num_questions: int = 20,
     n_matches: int = 10,
     mode: str = "training",
-    output_dir: str = "results",
+    output_dir: str = "logs",
     generate_new_questions: bool = False,
     use_cot: bool = False,
     seed: int = None,
@@ -80,7 +80,6 @@ def run_full_evaluation(
         
         # Generate consistent filename for questions
         questions_filename = generate_questions_filename(
-            model=model_abbreviation,
             num_questions=num_questions,
             run_id=run_id,
             timestamp=timestamp
@@ -106,7 +105,7 @@ def run_full_evaluation(
     print("STEP 2: Running matches between character pairs")
     print("=" * 60)
     
-    csv_output_dir = dirs["matches"]
+    csv_output_dir = dirs["csv_files"]
     
     if split is not None:
         # Split mode: generate both training and testing files
@@ -145,7 +144,7 @@ def run_full_evaluation(
     print("STEP 3: Producing rankings and evaluation metrics")
     print("=" * 60)
     
-    ranking_output_dir = dirs["rankings"]
+    ranking_output_dir = dirs["results"]
     
     if split is not None:
         # Use both training and testing files
@@ -258,8 +257,8 @@ Examples:
     
     parser.add_argument(
         "--output-dir", 
-        default="results",
-        help="Directory to save all results (default: results)"
+        default="logs",
+        help="Directory to save all results"
     )
     
     parser.add_argument(
@@ -283,7 +282,7 @@ Examples:
     parser.add_argument(
         "--split",
         type=float,
-        help="If provided, split matches into training/testing sets (e.g., 0.8 for 80% training)"
+        help="If provided, split matches into training/testing sets (e.g., 0.8 for 80 percent training)"
     )
     
     args = parser.parse_args()

@@ -40,7 +40,6 @@ def sanitize_filename(filename: str) -> str:
 
 
 def generate_questions_filename(
-    model: str,
     num_questions: int,
     run_id: Optional[str] = None,
     timestamp: Optional[str] = None
@@ -49,21 +48,19 @@ def generate_questions_filename(
     Generate a consistent filename for question files.
     
     Args:
-        model: Model abbreviation used for generation
         num_questions: Number of questions generated
         run_id: Optional run ID (auto-generated if not provided)
         timestamp: Optional timestamp (auto-generated if not provided)
         
     Returns:
-        Filename like: questions_mistral-instruct_10_20241201_143022_abc12345.json
+        Filename like: questions_10_20241201_143022_abc12345.json
     """
     if timestamp is None:
         timestamp = generate_timestamp()
     if run_id is None:
         run_id = generate_run_id()
     
-    model_safe = sanitize_filename(model)
-    filename = f"questions_{model_safe}_{num_questions}_{timestamp}_{run_id}.json"
+    filename = f"questions_{num_questions}_{timestamp}_{run_id}.json"
     return filename
 
 
@@ -132,12 +129,12 @@ def generate_rankings_filename(
     return f"rankings_{model_safe}_{timestamp}_{run_id}.csv"
 
 
-def create_output_directories(base_dir: str = "results") -> dict:
+def create_output_directories(base_dir: str = "logs") -> dict:
     """
-    Create organized output directories.
+    Create organized output directories under logs/.
     
     Args:
-        base_dir: Base directory for all results
+        base_dir: Base directory for all results (default: logs)
         
     Returns:
         Dictionary with paths to different output directories
@@ -148,9 +145,9 @@ def create_output_directories(base_dir: str = "results") -> dict:
     dirs = {
         "base": base_dir,
         "questions": os.path.join(base_dir, "questions"),
-        "matches": os.path.join(base_dir, "matches"),
-        "rankings": os.path.join(base_dir, "rankings"),
-        "logs": os.path.join(base_dir, "logs"),
+        "evals": os.path.join(base_dir, "evals"),
+        "csv_files": os.path.join(base_dir, "csv-files"),
+        "results": os.path.join(base_dir, "results"),
         "timestamp": timestamp,
         "run_id": run_id
     }
