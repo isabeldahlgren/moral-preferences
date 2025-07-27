@@ -165,8 +165,6 @@ results/
     ├── mistral-instruct_metrics_20241201_143022_1701456789_abc12345.csv
     └── plots/
         ├── mistral-instruct_elo_20241201_143022_1701456789_abc12345.png
-        ├── mistral-instruct_elo2k_20241201_143022_1701456789_abc12345.png
-        ├── mistral-instruct_bradley-terry_20241201_143022_1701456789_abc12345.png
         └── mistral-instruct_glicko2_20241201_143022_1701456789_abc12345.png
 ```
 
