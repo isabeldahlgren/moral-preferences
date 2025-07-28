@@ -447,7 +447,7 @@ class QCQuestion(BaseModel):
 
 # Load few-shot examples at module level
 try:
-    with open("moral preference_fewshot.json", "r") as f:
+    with open("fewshot_examples.json", "r") as f:
         FEWSHOT_EXAMPLES = json.load(f)
 except FileNotFoundError:
     FEWSHOT_EXAMPLES = []

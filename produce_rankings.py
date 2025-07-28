@@ -10,7 +10,6 @@ import random
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 from typing import Dict, Any
-from scipy.optimize import differential_evolution, minimize
 
 # Import file utilities for consistent naming
 from file_utils import (

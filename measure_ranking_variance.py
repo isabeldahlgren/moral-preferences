@@ -39,6 +39,9 @@ def get_ranking_file(run_dir):
         raise FileNotFoundError(f"No ranking CSV found in {run_dir}")
     return files[0]
 
+def short_id(run):
+    return run[-12:]
+
 def main():
     parser = argparse.ArgumentParser(description="Measure variance in normalized ELO, Glicko2, and WinCount rankings between two runs.")
     parser.add_argument('--run1', required=True, help='First run directory name (under logs/results)')
@@ -83,7 +86,10 @@ def main():
         else:
             print(f"Skipping {method} - data not available from both runs")
 
-    out_csv = os.path.join(VARIANCES_DIR, f'ranking_variance_{run_ids[0]}_vs_{run_ids[1]}.csv')
+    out_csv = os.path.join(
+        VARIANCES_DIR,
+        f"ranking_variance_{short_id(run_ids[0])}_vs_{short_id(run_ids[1])}.csv"
+    )
     pd.DataFrame(results).to_csv(out_csv, index=False)
     print(f"Saved variance results to {out_csv}")
 

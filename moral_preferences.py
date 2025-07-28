@@ -12,7 +12,6 @@ Usage:
 import argparse
 import os
 import sys
-from pathlib import Path
 
 # Add the scripts directory to the path so we can import the other modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

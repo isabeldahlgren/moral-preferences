@@ -1,0 +1,4 @@
+,inconsistency_score,num_players,num_matches
+Elo,0.3461988304093567,17,127
+Glicko2,0.38128654970760234,17,127
+WinCount,0.47500000000000003,16,127

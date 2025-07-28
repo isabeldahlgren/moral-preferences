@@ -259,3 +259,51 @@ This script will:
 - Save a CSV of the results to `logs/variances/ranking_variance_<run1>_vs_<run2>.csv`.
 
 **Note:** You must specify two valid run directory names under `logs/results/`.
+
+## Regenerating Results from Existing Match Data
+
+If you have existing match CSV files and want to regenerate results with updated code (e.g., to include new WinCount rankings, updated plots, etc.), you can use the regeneration script without rerunning the expensive match generation step.
+
+### Regeneration Commands
+
+**Regenerate all results for all models:**
+```bash
+python regenerate_results.py --all
+```
+
+**Regenerate results for a specific model:**
+```bash
+python regenerate_results.py --model together_deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B
+```
+
+**Save to a different directory:**
+```bash
+python regenerate_results.py --all --output-dir logs/results_updated
+```
+
+**Dry run to see what would be regenerated:**
+```bash
+python regenerate_results.py --dry-run
+```
+
+### What Gets Regenerated
+
+The regeneration script will create new results with all the latest features:
+
+- **Rankings CSV**: Elo, Glicko2, and WinCount rankings
+- **Metrics CSV**: Inconsistency scores for all three methods  
+- **Evaluation CSV**: MSE, MAE, accuracy, log loss, and inconsistency scores
+- **Plots**: Updated plots showing all characters and WinCount rankings
+
+### Available Models
+
+Based on your existing match CSV files, you can regenerate results for these models:
+- `together_deepseek-ai_DeepSeek-R1-Distill-Qwen-1.5B`
+- `together_mistralai_Mistral-7B-Instruct-v0.3`
+- `together_google_gemma-3n-E4B-it`
+- `openai_gpt-4o-mini`
+- `anthropic_claude-3-5-sonnet-latest`
+
+### Output Location
+
+By default, regenerated results are saved to `logs/results_regenerated/` to keep them separate from the original results. Each model gets its own timestamped directory with the same structure as the original results.
