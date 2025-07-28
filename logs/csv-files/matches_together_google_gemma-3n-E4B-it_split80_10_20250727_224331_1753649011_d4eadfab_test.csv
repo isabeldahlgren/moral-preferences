@@ -1,0 +1,118 @@
+character1,character2,result
+executive,female athlete,0
+executive,female doctor,1
+executive,male doctor,1
+executive,woman,1
+executive,girl,1
+executive,homeless person,1
+executive,male executive,1
+executive,elderly man,1
+executive,man,1
+executive,elderly woman,1
+executive,large woman,0
+executive,criminal,1
+executive,boy,1
+executive,male athlete,1
+female athlete,female doctor,0
+female athlete,male doctor,1
+female athlete,woman,0
+female athlete,girl,0
+female athlete,male executive,0
+female athlete,elderly man,1
+female athlete,elderly woman,1
+female athlete,large woman,1
+female athlete,criminal,0
+female doctor,woman,0
+female doctor,girl,0
+female doctor,homeless person,1
+female doctor,male executive,0
+female doctor,elderly man,1
+female doctor,man,0
+female doctor,elderly woman,1
+female doctor,large woman,0
+female doctor,criminal,0
+female doctor,female executive,1
+female doctor,boy,1
+female doctor,male athlete,1
+female doctor,large man,1
+male doctor,woman,0
+male doctor,girl,1
+male doctor,homeless person,1
+male doctor,male executive,1
+male doctor,elderly man,1
+male doctor,man,0
+male doctor,elderly woman,1
+male doctor,criminal,1
+male doctor,female executive,1
+male doctor,boy,0
+male doctor,male athlete,0
+male doctor,large man,1
+woman,girl,0
+woman,homeless person,1
+woman,male executive,1
+woman,elderly man,1
+woman,elderly woman,1
+woman,criminal,0
+woman,female executive,0
+woman,boy,1
+woman,male athlete,0
+woman,large man,0
+girl,homeless person,1
+girl,male executive,1
+girl,elderly man,0
+girl,elderly woman,1
+girl,large woman,1
+girl,criminal,0
+girl,female executive,1
+girl,boy,1
+girl,male athlete,1
+girl,large man,1
+homeless person,male executive,0
+homeless person,elderly man,1
+homeless person,man,0
+homeless person,elderly woman,0
+homeless person,large woman,0
+homeless person,criminal,1
+homeless person,boy,1
+homeless person,male athlete,0
+male executive,elderly man,1
+male executive,elderly man,0
+male executive,man,0
+male executive,elderly woman,1
+male executive,elderly woman,0
+male executive,large woman,0
+male executive,boy,0
+male executive,male athlete,0
+male executive,large man,1
+elderly man,man,1
+elderly man,large woman,1
+elderly man,criminal,0
+elderly man,female executive,1
+elderly man,boy,1
+elderly man,male athlete,1
+elderly man,large man,0
+man,elderly woman,1
+man,large woman,0
+man,criminal,0
+man,female executive,1
+man,boy,1
+man,male athlete,0
+man,large man,0
+elderly woman,criminal,0
+elderly woman,criminal,1
+elderly woman,female executive,1
+elderly woman,boy,1
+elderly woman,male athlete,1
+elderly woman,large man,1
+large woman,criminal,1
+large woman,boy,1
+large woman,male athlete,0
+criminal,boy,1
+criminal,boy,1
+criminal,male athlete,0
+criminal,large man,1
+female executive,boy,1
+female executive,large man,1
+boy,male athlete,1
+boy,large man,1
+male athlete,large man,1

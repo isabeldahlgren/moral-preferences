@@ -781,6 +781,84 @@ def evaluate_rating_models(
             "num_predictions": len(predictions),
         }
 
+    # Add win count evaluation
+    if training_csv:
+        # Get win count ranking from training data
+        train_matches = csv_to_matches(training_csv)
+        win_rankings, win_ranking_list = count_wins_ranking(train_matches)
+        
+        # Create a simple model-like object for win count
+        class WinCountModel:
+            def __init__(self, rankings):
+                self.rankings = rankings
+                self.ratings = {player: score for player, score in rankings}
+        
+        win_count_model = WinCountModel(win_rankings)
+        
+        # Evaluate win count model
+        predictions = []
+        actual_results = []
+
+        for _, row in df.iterrows():
+            player1 = row["character1"]
+            player2 = row["character2"]
+            actual_result = row["result"]  # 1 if player1 wins, 0 if player2 wins
+
+            # Skip if either player not in win count rankings
+            if player1 not in win_count_model.ratings or player2 not in win_count_model.ratings:
+                continue
+
+            rating1 = win_count_model.ratings[player1]
+            rating2 = win_count_model.ratings[player2]
+
+            # Compute probability that player1 beats player2 based on win counts
+            # Using logistic function: P(1 beats 2) = 1 / (1 + exp(-(wins1 - wins2)/10))
+            # The 10 is a scaling factor for win counts
+            prob_player1_wins = 1 / (1 + math.exp(-(rating1 - rating2) / 10))
+
+            predictions.append(prob_player1_wins)
+            actual_results.append(actual_result)
+
+        if predictions:
+            predictions = np.array(predictions)
+            actual_results = np.array(actual_results)
+
+            # Calculate metrics
+            mse = np.mean((predictions - actual_results) ** 2)
+            mae = np.mean(np.abs(predictions - actual_results))
+            predicted_winners = (predictions > 0.5).astype(int)
+            accuracy = np.mean(predicted_winners == actual_results) * 100
+
+            # Log loss
+            eps = 1e-15
+            clipped_preds = np.clip(predictions, eps, 1 - eps)
+            log_loss = -np.mean(
+                actual_results * np.log(clipped_preds)
+                + (1 - actual_results) * np.log(1 - clipped_preds)
+            )
+
+            # Calculate inconsistency score
+            test_matches = csv_to_matches(csv_file)
+            inconsistency = calculate_inconsistency_score(test_matches, win_ranking_list)
+
+            results["WinCount"] = {
+                "mse": round(mse, 6),
+                "mae": round(mae, 6),
+                "accuracy": round(accuracy, 2),
+                "log_loss": round(log_loss, 6),
+                "is": round(inconsistency, 6),
+                "num_predictions": len(predictions),
+            }
+        else:
+            results["WinCount"] = {
+                "mse": float("nan"),
+                "mae": float("nan"),
+                "accuracy": float("nan"),
+                "log_loss": float("nan"),
+                "is": float("nan"),
+                "num_predictions": 0,
+            }
+
     if run_with_pairwise:
         # Evaluate pairwise comparisons
         predictions = []
@@ -890,6 +968,12 @@ def save_rankings_and_plots(
             rankings, _ = model.get_rankings()
             rankings_data[model_name] = rankings
     
+    # Add win count ranking
+    win_rankings, _ = count_wins_ranking(matches)
+    # Convert win rankings to same format as other rankings (player, rating, empty CI fields)
+    win_rankings_formatted = [(player, score, "", "", "", "") for player, score in win_rankings]
+    rankings_data['WinCount'] = win_rankings_formatted
+    
     # Save rankings to CSV with timestamped naming
     rankings_filename = f"{model_string.replace('/', '_')}_rankings_{timestamp}_{run_id}.csv"
     rankings_csv_path = os.path.join(output_dir, rankings_filename)
@@ -922,6 +1006,16 @@ def save_rankings_and_plots(
             'num_players': len(ranking_list),
             'num_matches': len(matches)
         }
+    
+    # Add win count ranking and its inconsistency score
+    win_rankings, win_ranking_list = count_wins_ranking(matches)
+    win_inconsistency = calculate_inconsistency_score(matches, win_ranking_list)
+    
+    metrics_data['WinCount'] = {
+        'inconsistency_score': win_inconsistency,
+        'num_players': len(win_ranking_list),
+        'num_matches': len(matches)
+    }
     
     # Save metrics to CSV with timestamped naming
     metrics_filename = f"{model_string.replace('/', '_')}_metrics_{timestamp}_{run_id}.csv"
