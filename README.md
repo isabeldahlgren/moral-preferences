@@ -260,6 +260,67 @@ This script will:
 
 **Note:** You must specify two valid run directory names under `logs/results/`.
 
+## Optimizing Rankings with Simulated Annealing
+
+The `optimize_rankings.py` script uses simulated annealing to find optimal character rankings that minimize the inconsistency score. This provides an alternative to the standard Elo and Glicko2 ranking methods.
+
+### Basic Usage
+
+**Optimize on a single CSV file:**
+```bash
+python optimize_rankings.py --csv matches.csv --model claude-3-5-sonnet
+```
+
+**Optimize on multiple CSV files (e.g., train and test splits):**
+```bash
+python optimize_rankings.py --csv train.csv test.csv --model claude-3-5-sonnet
+```
+
+**For your specific split data:**
+```bash
+python optimize_rankings.py \
+  --csv logs/csv-files/matches_anthropic_claude-3-5-sonnet-latest_split80_10_20250727_203846_1753641526_df254137_train.csv \
+       logs/csv-files/matches_anthropic_claude-3-5-sonnet-latest_split80_10_20250727_203846_1753641526_df254137_test.csv \
+  --model claude-3-5-sonnet
+```
+
+### Advanced Options
+
+**Custom optimization parameters:**
+```bash
+python optimize_rankings.py \
+  --csv train.csv test.csv \
+  --model gpt-4o-mini \
+  --initial-temp 200 \
+  --cooling-rate 0.995 \
+  --max-iter 5000 \
+  --seed 42
+```
+
+**Disable progress plots:**
+```bash
+python optimize_rankings.py --csv matches.csv --model test --no-plots
+```
+
+### Output
+
+The script generates:
+- **CSV ranking file**: `optimal_ranking_{model}_{timestamp}.csv`
+- **Metadata file**: `optimal_ranking_metadata_{model}_{timestamp}.txt`
+- **Progress plot**: `optimization_progress_{model}_{timestamp}.png`
+
+### Parameters
+
+- `--csv`: One or more CSV files with matches (character1, character2, result columns)
+- `--model`: Model string identifier for naming output files
+- `--initial-temp`: Initial temperature for simulated annealing (default: 100)
+- `--cooling-rate`: Rate at which temperature decreases (default: 0.99)
+- `--min-temp`: Minimum temperature to stop optimization (default: 0.001)
+- `--max-iter`: Maximum number of iterations (default: 10000)
+- `--seed`: Random seed for reproducibility
+- `--output-dir`: Directory to save results (default: logs/optimized_rankings)
+- `--no-plots`: Don't save optimization progress plots
+
 ## Regenerating Results from Existing Match Data
 
 If you have existing match CSV files and want to regenerate results with updated code (e.g., to include new WinCount rankings, updated plots, etc.), you can use the regeneration script without rerunning the expensive match generation step.
