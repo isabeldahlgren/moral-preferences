@@ -1,0 +1,6 @@
+method,inconsistency_score,difference_from_optimal,ranking
+Elo,0.42222222222222217,0.08444444444444449,Character_9 -> Character_8 -> Character_7 -> Character_10 -> Character_4 -> Character_2 -> Character_3 -> Character_5 -> Character_6 -> Character_1
+Glicko2,0.42222222222222217,0.08444444444444449,Character_8 -> Character_4 -> Character_9 -> Character_2 -> Character_10 -> Character_5 -> Character_7 -> Character_6 -> Character_3 -> Character_1
+WinCount,0.39555555555555544,0.05777777777777776,Character_8 -> Character_9 -> Character_4 -> Character_2 -> Character_10 -> Character_5 -> Character_6 -> Character_7 -> Character_3 -> Character_1
+SimulatedAnnealing,0.3733333333333332,0.03555555555555551,Character_9 -> Character_10 -> Character_8 -> Character_4 -> Character_6 -> Character_7 -> Character_3 -> Character_5 -> Character_2 -> Character_1
+BruteForce,0.3377777777777777,0.0,Character_9 -> Character_5 -> Character_10 -> Character_8 -> Character_4 -> Character_2 -> Character_6 -> Character_7 -> Character_1 -> Character_3
