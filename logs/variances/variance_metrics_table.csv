@@ -1,0 +1,16 @@
+Model,Method,Total Variation Distance,Jensen-Shannon Divergence,Rank Edit Distance
+DeepSeek-R1-Distill,Elo,0.0266,0.0007,108
+,Glicko2,0.0103,0.0001,102
+,WinCount,0.0415,0.0017,80
+GPT-4o-Mini,Elo,0.0134,0.0002,88
+,Glicko2,0.0347,0.0013,74
+,WinCount,0.1365,0.0306,52
+Mistral-7B-Instruct,Elo,0.0141,0.0002,134
+,Glicko2,0.0091,0.0001,120
+,WinCount,0.0343,0.0012,120
+Claude-3.5-Sonnet,Elo,0.0144,0.0002,100
+,Glicko2,0.0132,0.0002,106
+,WinCount,0.0903,0.0077,96
+Gemma-3n-E4B,Elo,0.0174,0.0003,96
+,Glicko2,0.0393,0.0017,90
+,WinCount,0.1524,0.0291,40

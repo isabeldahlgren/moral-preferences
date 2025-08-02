@@ -1,0 +1,6 @@
+Model,Best Accuracy Method,Best Inconsistency Score Method,Best MSE Method
+DeepSeek-R1-Distill,Elo,WinCount,Glicko2
+GPT-4o-Mini,Elo,Glicko2,Elo
+Mistral-7B-Instruct,Elo,Glicko2,Elo
+Claude-3.5-Sonnet,Elo,Elo,Elo
+Gemma-3n-E4B,Elo,Glicko2,Elo
