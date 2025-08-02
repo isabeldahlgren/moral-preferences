@@ -1,0 +1,6 @@
+,Elo,Glicko2,WinCount,Simulated Annealing
+claude-3-5-sonnet,0.4778,0.453,0.4537,0.4689
+gpt-4o-mini,0.2967,0.2607,0.421,0.3015
+gemma-3n-E4B-it,0.3462,0.3813,0.475,0.3362
+mistral-7B-instruct-v0.3,0.4953,0.4758,0.4808,0.4839
+deepseek-r1-distill-qwen-1.5B,0.4877,0.4788,0.4605,0.4512
