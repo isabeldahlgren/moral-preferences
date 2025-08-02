@@ -16,7 +16,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from generate_questions import generate_questions
-from run_matches import run_matches
+from run_matches import run_matches, find_questions_file
 from produce_rankings import produce_rankings
 from file_utils import (
     create_output_directories,
@@ -36,7 +36,8 @@ def run_full_evaluation(
     use_cot: bool = False,
     seed: int = None,
     verbose: bool = False,
-    split: float = None
+    split: float = None,
+    config_name: str = None
 ) -> dict:
     """
     Run the complete evaluation pipeline.
@@ -76,25 +77,44 @@ def run_full_evaluation(
         print("=" * 60)
         
         # Generate consistent filename for questions
-        questions_filename = generate_questions_filename(
-            num_questions=num_questions,
-            run_id=run_id,
-            timestamp=timestamp
-        )
-        questions_output = os.path.join(dirs["questions"], questions_filename)
+        if config_name:
+            # Use config-specific directory
+            config_dir = os.path.join("logs", "question-configs", config_name)
+            os.makedirs(config_dir, exist_ok=True)
+            questions_filename = f"{config_name}_{timestamp}_{run_id}.json"
+            questions_output = os.path.join(config_dir, questions_filename)
+        else:
+            # Use general questions directory
+            questions_filename = generate_questions_filename(
+                num_questions=num_questions,
+                run_id=run_id,
+                timestamp=timestamp
+            )
+            questions_output = os.path.join(dirs["questions"], questions_filename)
         
         questions = generate_questions(
             num_questions=num_questions,
             model="gpt-4o-mini",  # Use GPT-4o-mini for question generation
             output_file=questions_output,
             seed=seed,
-            verbose=verbose
+            verbose=verbose,
+            config_name=config_name
         )
         questions_json = questions_output
         results['questions'] = questions_output
         print(f"✅ Generated {len(questions)} questions: {questions_output}")
     else:
-        print(f"✅ Using existing questions: {questions_json}")
+        # Handle both direct paths and config names
+        if questions_json and not os.path.exists(questions_json):
+            # Try to find it as a config name
+            found_questions = find_questions_file(questions_json)
+            if found_questions != questions_json:
+                print(f"✅ Found questions using config '{questions_json}': {found_questions}")
+                questions_json = found_questions
+            else:
+                print(f"⚠️  Warning: Questions file not found: {questions_json}")
+        else:
+            print(f"✅ Using existing questions: {questions_json}")
         results['questions'] = questions_json
     
     # Step 2: Run matches
@@ -282,6 +302,11 @@ Examples:
         help="If provided, split matches into training/testing sets (e.g., 0.8 for 80 percent training)"
     )
     
+    parser.add_argument(
+        "--config", 
+        help="Configuration name for question generation (e.g., default, custom_config, thoughtful)"
+    )
+    
     args = parser.parse_args()
     
     # Validate input file
@@ -308,7 +333,8 @@ Examples:
             use_cot=args.use_cot,
             seed=args.seed,
             verbose=args.verbose,
-            split=args.split
+            split=args.split,
+            config_name=args.config
         )
         
         print("\n🎉 Evaluation completed successfully!")

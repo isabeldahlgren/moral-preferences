@@ -1,0 +1,12 @@
+{
+  "fewshot_examples_file": "fewshot_examples.json",
+  "custom_rubric_file": "example_custom_rubric.txt",
+  "custom_prompts_file": "example_custom_prompts.json",
+  "question_suffix": "You must think through the options carefully.",
+  "question_prefix": "",
+  "min_score_threshold": 4,
+  "num_shots": 5,
+  "p_var": 0.5,
+  "use_fewshot": true,
+  "use_variance": true
+}

@@ -2,18 +2,67 @@
 
 This directory contains scripts for evaluating moral preference in AI models through character-based comparisons.
 
+## 🎯 Question Customization
+
+The system now supports extensive customization of question generation and evaluation through a config-based approach. See [CUSTOMIZATION_GUIDE.md](CUSTOMIZATION_GUIDE.md) for detailed instructions on:
+
+- **Custom few-shot examples** - Use your own question templates
+- **Custom scoring rubrics** - Define your own quality criteria  
+- **Question field customization** - Add prefixes/suffixes to questions
+- **Custom prompts** - Modify system and user prompts
+- **Generation parameters** - Control scoring thresholds, variance, etc.
+
+### Config-Based Question Management
+
+Questions are now organized by configuration in `logs/question-configs/`:
+
+```
+logs/question-configs/
+├── default/                    # Default configuration
+│   ├── default_20250801_073045_39422c6d.json
+│   └── default_20250801_072916_9be24ba4.json
+├── custom_config/              # Custom configuration
+│   └── custom_config_20250801_081312_1754028792_b39f7a31.json
+├── thoughtful/                 # Thoughtful configuration
+└── medical-bias/              # Medical bias configuration
+```
+
+**Quick customization examples:**
+```bash
+# List available configurations
+python generate_questions.py --config list
+
+# Generate questions with default config (saves to logs/question-configs/default/)
+python generate_questions.py --num-questions 20
+
+# Generate questions with custom config (saves to logs/question-configs/custom_config/)
+python generate_questions.py --config custom_config --num-questions 20
+
+# Use built-in thoughtful configuration
+python generate_questions.py --config thoughtful --num-questions 20
+
+# Use medical bias configuration
+python generate_questions.py --config medical-bias --num-questions 15
+```
+
 ## Quick Start
 
 For easiest use, use the simplified interface:
 
 ```bash
-# Generate evaluation questions
+# Generate evaluation questions with default config
 python moral_preferences.py generate-questions --num-questions 20
+
+# Generate questions with specific config
+python moral_preferences.py generate-questions --config custom_config --num-questions 20
 
 # Run evaluation with default questions (training mode)
 python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini
 
-# Run evaluation with custom questions (training mode)
+# Run evaluation with questions from specific config
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions custom_config
+
+# Run evaluation with custom questions file (training mode)
 python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions my_questions.json
 
 # Run evaluation with test mode (training/test split + predictive accuracy)
@@ -28,6 +77,9 @@ python moral_preferences.py evaluate --characters characters.csv --model openai/
 > python moral_preferences.py evaluate --model together/meta-llama/Llama-3-70B-Instruct ...
 > ```
 > Make sure your API keys are set in your `.env` file.
+
+> **Default configuration:**
+> When no `--config` flag is provided, the system automatically uses the `default` configuration from `question-configs/default.json`. This contains the standard prompts and settings for moral preference evaluation.
 
 ## Setup with uv
 
@@ -145,7 +197,12 @@ Results are automatically organized in a structured directory layout:
 
 ```
 logs/
-├── questions/          # Generated question files
+├── question-configs/   # Question files organized by config
+│   ├── default/        # Default configuration questions
+│   ├── custom_config/  # Custom configuration questions
+│   ├── thoughtful/     # Thoughtful configuration questions
+│   └── medical-bias/   # Medical bias configuration questions
+├── questions/          # Legacy question files (deprecated)
 ├── csv-files/         # Match CSV files
 ├── results/           # Ranking and evaluation results
 └── evals/            # Model evaluation logs
@@ -156,6 +213,14 @@ logs/
 All output files use a consistent naming pattern with timestamps and run IDs:
 
 #### Question Files
+
+**Config-based questions (recommended):**
+```
+{config_name}_{timestamp}_{unique_id}.json
+```
+Example: `custom_config_20250801_081312_1754028792_b39f7a31.json`
+
+**Legacy questions (deprecated):**
 ```
 questions_{model}_{num_questions}_{timestamp}_{run_id}.json
 ```
@@ -191,13 +256,61 @@ results/
         └── mistral-instruct_glicko2_20241201_143022_1701456789_abc12345.png
 ```
 
+## Config-Based Workflow
+
+The new config-based approach provides better organization and flexibility:
+
+### 1. Generate Questions with Configs
+
+```bash
+# Generate with default config (saves to logs/question-configs/default/)
+python generate_questions.py --num-questions 20
+
+# Generate with custom config (saves to logs/question-configs/custom_config/)
+python generate_questions.py --config custom_config --num-questions 20
+
+# List available configs
+python generate_questions.py --config list
+```
+
+### 2. Run Matches with Config-Based Questions
+
+```bash
+# Use questions from default config
+python run_matches.py --model openai/gpt-4o-mini --characters characters.csv --questions default
+
+# Use questions from custom config
+python run_matches.py --model openai/gpt-4o-mini --characters characters.csv --questions custom_config
+
+# Use specific question file
+python run_matches.py --model openai/gpt-4o-mini --characters characters.csv --questions my_questions.json
+```
+
+### 3. Full Evaluation Pipeline
+
+```bash
+# Generate questions and run evaluation with default config
+python run_full_evaluation.py --characters characters.csv --model openai/gpt-4o-mini --generate-questions --num-questions 20
+
+# Generate questions with specific config and run evaluation
+python run_full_evaluation.py --characters characters.csv --model openai/gpt-4o-mini --generate-questions --config custom_config --num-questions 20
+
+# Use existing questions from config
+python run_full_evaluation.py --characters characters.csv --model openai/gpt-4o-mini --questions custom_config
+```
+
 ## Examples
 
 ### Basic Usage
 
-**Generate questions:**
+**Generate questions with default config:**
 ```bash
 python moral_preferences.py generate-questions --num-questions 20
+```
+
+**Generate questions with specific config:**
+```bash
+python moral_preferences.py generate-questions --config custom_config --num-questions 20
 ```
 
 **Basic evaluation (training mode):**
@@ -205,7 +318,12 @@ python moral_preferences.py generate-questions --num-questions 20
 python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini
 ```
 
-**Evaluation with custom questions:**
+**Evaluation with questions from config:**
+```bash
+python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions custom_config
+```
+
+**Evaluation with custom questions file:**
 ```bash
 python moral_preferences.py evaluate --characters characters.csv --model openai/gpt-4o-mini --questions my_questions.json
 ```

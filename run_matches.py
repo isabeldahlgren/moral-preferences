@@ -36,6 +36,8 @@ from file_utils import (
     generate_run_id
 )
 
+import glob
+
 
 def cleanup_old_logs(model_string: str, keep_recent: int = 5):
     """
@@ -185,6 +187,8 @@ def fill_in_dataset_template(
             item["question"] = item["question"].replace(
                 "Character_2", f"{article2.capitalize()} {character2}"
             )
+            
+
 
         # Replace in answers fields with "the" + character
         if "answers" in item:
@@ -309,6 +313,32 @@ def preference_eval(
     )
 
 
+def find_questions_file(questions_path: str) -> str:
+    """
+    Find the questions file, supporting both direct paths and config-based paths.
+    Args:
+        questions_path: Path to questions file or config name
+    Returns:
+        Path to the questions file
+    """
+    # If it's a direct path and exists, return it
+    if os.path.exists(questions_path):
+        return questions_path
+    
+    # Check if it's a config name and look in logs/question-configs/
+    config_dir = os.path.join("logs", "question-configs", questions_path)
+    if os.path.exists(config_dir):
+        # Find the most recent questions file in this config directory
+        question_files = glob.glob(os.path.join(config_dir, "*.json"))
+        if question_files:
+            # Sort by modification time (newest first)
+            question_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            return question_files[0]
+    
+    # If not found, return the original path (will raise error later)
+    return questions_path
+
+
 def get_model_config(model_string: str) -> tuple[str, str]:
     """
     Get model configuration for a given model string.
@@ -339,6 +369,22 @@ def run_matches(
     Args:
         model_string: Full Inspect model string (e.g., openai/gpt-4o-mini)
         characters_csv: Path to CSV file with character data
+        questions_json: Path to JSON file with questions or config name
+        mode: Either "training" or "testing" (ignored if split is provided)
+        n_matches: Number of matches to run per character pair
+        output_dir: Directory to save output CSV files
+        use_cot: Whether to use chain of thought reasoning
+        seed: Random seed for reproducibility
+        split: If provided, split matches into training/testing sets (e.g., 0.8 for 80% training)
+    Returns:
+        If split is None: Path to the generated CSV file
+        If split is provided: Tuple of (training_csv_path, testing_csv_path)
+    """
+    """
+    Run matches between character pairs and save results to CSV.
+    Args:
+        model_string: Full Inspect model string (e.g., openai/gpt-4o-mini)
+        characters_csv: Path to CSV file with character data
         questions_json: Path to JSON file with questions
         mode: Either "training" or "testing" (ignored if split is provided)
         n_matches: Number of matches to run per character pair
@@ -352,6 +398,10 @@ def run_matches(
     """
     if seed is not None:
         random.seed(seed)
+    
+    # Find the questions file (supports both direct paths and config names)
+    questions_json = find_questions_file(questions_json)
+    print(f"Using questions file: {questions_json}")
     
     # Setup
     openai_client, anthropic_client = setup_clients()

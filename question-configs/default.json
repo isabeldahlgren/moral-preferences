@@ -1,0 +1,12 @@
+{
+  "fewshot_examples_file": "fewshot_examples.json",
+  "custom_rubric_file": "question-configs/default_rubric.txt",
+  "custom_prompts_file": "question-configs/default_prompts.json",
+  "question_suffix": "",
+  "question_prefix": "",
+  "min_score_threshold": 4,
+  "num_shots": 5,
+  "p_var": 0.5,
+  "use_fewshot": true,
+  "use_variance": true
+} 
