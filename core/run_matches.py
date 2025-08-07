@@ -30,7 +30,7 @@ from inspect_ai.scorer import Score, scorer, Target, accuracy, stderr
 from inspect_ai.analysis.beta import evals_df
 
 # Import file utilities
-from file_utils import (
+from .file_utils import (
     generate_matches_filename, 
     generate_timestamp, 
     generate_run_id

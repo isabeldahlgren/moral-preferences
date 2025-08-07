@@ -12,7 +12,7 @@ from scipy.stats import norm
 from typing import Dict, Any
 
 # Import file utilities for consistent naming
-from file_utils import (
+from .file_utils import (
     generate_timestamp,
     generate_run_id
 )

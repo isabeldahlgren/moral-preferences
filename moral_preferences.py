@@ -13,13 +13,13 @@ import argparse
 import os
 import sys
 
-# Add the scripts directory to the path so we can import the other modules
+# Add the current directory to the path so we can import the modules
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from generate_questions import generate_questions
-from run_matches import run_matches
-from produce_rankings import produce_rankings
-from file_utils import (
+from core.generate_questions import generate_questions
+from core.run_matches import run_matches
+from core.produce_rankings import produce_rankings
+from core.file_utils import (
     create_output_directories,
     generate_questions_filename
 )
@@ -72,13 +72,13 @@ def evaluate_command(args):
         questions_json = args.questions
         print(f"✅ Using specified questions file: {questions_json}")
     else:
-        # Use default questions file in scripts directory
-        default_questions = os.path.join(os.path.dirname(__file__), "questions.json")
+        # Use default questions file in data directory
+        default_questions = os.path.join(os.path.dirname(__file__), "data", "questions.json")
         if os.path.exists(default_questions):
             questions_json = default_questions
             print(f"✅ Using default questions file: {questions_json}")
         else:
-            print("❌ Error: No questions file specified and default questions.json not found")
+            print("❌ Error: No questions file specified and default data/questions.json not found")
             print("Please either:")
             print("  1. Specify a questions file with --questions")
             print("  2. Generate questions first with: python moral_preferences.py generate-questions")
